@@ -99,6 +99,8 @@ int startPos = 1500;
 int counter = 1;
 int long buttonPressStartTime = 0;
 bool held = false;
+bool timing = false;
+bool triggered = false;
 
 byte ID[6];
 s16 Position[6];
@@ -113,31 +115,35 @@ void setup() {
   //out code from below
   for (int i = 2; i <= 8; i++)
     pinMode(i, OUTPUT);
-    pinMode(xPin, INPUT);
-    pinMode(yPin, INPUT);
-    pinMode(buttonPin, INPUT_PULLUP);
-    //Setting the initial position of all the servos to relative middle
-    st.WritePosEx(1, 2070, 500, 25);
-    st.WritePosEx(2, 1500, 500, 25);
-    st.WritePosEx(3, 2500, 500, 25);
-    st.WritePosEx(4, 2000, 500, 25);
-    st.WritePosEx(5, 2050, 500, 25);
-    st.WritePosEx(6, 2200, 500, 25);
-    delay(1000);
+  pinMode(xPin, INPUT);
+  pinMode(yPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  //Setting the initial position of all the servos to relative middle
+  //*Double check, might not need these lines, keep delay
+  st.WritePosEx(1, 2070, 500, 25);
+  st.WritePosEx(2, 1500, 500, 25);
+  st.WritePosEx(3, 2500, 500, 25);
+  st.WritePosEx(4, 2000, 500, 25);
+  st.WritePosEx(5, 2050, 500, 25);
+  st.WritePosEx(6, 2200, 500, 25);
+  delay(1000);
 }
 
 void loop() {
   xVal = analogRead(xPin);
   yVal = analogRead(yPin);
-  buttonState = digitalRead(buttonPin);
   Pos = st.ReadPos(servoId);
   //Setting the initial position of all the servos to relative middle
+  //Added print for held or not held this is for testing if the bool
+  // is actually being changed or not
   Serial.print("X: ");
   Serial.print(xVal);
   Serial.print(" | Y: ");
   Serial.print(yVal);
   Serial.print(" | Pos: ");
   Serial.print(Pos);
+  Serial.print(" | Held: ");
+  Serial.print(held ? "true" : "false");
   Serial.print(" | ServoId: ");
   Serial.println(servoId);
   displayServo(servoId);
@@ -153,19 +159,29 @@ void loop() {
   }
 
 //New stuff for trying to use button held to change the servo and debouncing
-  if (xVal < 150 || xVal > 950 && !held) {
+  //Added parenthesis
+  if ((xVal < 150 || xVal > 950) && !timing) {
     buttonPressStartTime = millis();
+    timing = true;
   }
-  if(millis() - buttonPressStartTime >= 350){
+  if(millis() - buttonPressStartTime >= 350 && timing){
     held = true;
   }
-  if (xVal < 150 && held) {
-    servoId = servoId - 1;
+  //Added in the event that the joystick returns to the center before the
+  //required amount of time to change the servo
+  if (xVal >= 150 && xVal <= 950) {
     held = false;
+    timing = false;
+    triggered = false;
+  }
+  
+  if (xVal < 150 && held && !triggered) {
+    servoId = servoId - 1;
+    triggered = true;
   } else {
-    if (xVal > 900 && held) {
+    if (xVal > 950 && held && !triggered) {
       servoId = servoId + 1;
-      held = false;
+      triggered = true;
     }
   }
   if (servoId > 6) {
