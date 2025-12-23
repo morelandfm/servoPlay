@@ -74,6 +74,28 @@ void displayServo(int x) {
   }
 }
 
+//Function for resetting the position of each of the servos
+void reset(void){
+    st.WritePosEx(1, 2070, 500, 25);
+    st.WritePosEx(2, 1500, 500, 125);
+    st.WritePosEx(3, 2500, 500, 125);
+    st.WritePosEx(4, 2000, 500, 125);
+    st.WritePosEx(5, 2050, 500, 25);
+    st.WritePosEx(6, 2200, 500, 25);
+    delay(1000);
+}
+
+//Function for angle jump
+void angleJump(void){
+    st.WritePosEx(1, 2070, 500, 25);
+    st.WritePosEx(2, 1500, 500, 125);
+    st.WritePosEx(3, 2000, 500, 125);
+    st.WritePosEx(4, 1500, 500, 125);
+    st.WritePosEx(5, 2050, 500, 25);
+    st.WritePosEx(6, 2200, 500, 25);
+    delay(1000);
+}
+
 void clearDisplay(void) {
   digitalWrite(2, LOW);
   digitalWrite(3, LOW);
@@ -100,6 +122,7 @@ int counter = 1;
 int long buttonPressStartTime = 0;
 bool held = false;
 bool timing = false;
+bool bTiming = false;
 bool triggered = false;
 
 byte ID[6];
@@ -132,6 +155,7 @@ void setup() {
 void loop() {
   xVal = analogRead(xPin);
   yVal = analogRead(yPin);
+  buttonState = digitalRead(buttonPin);
   Pos = st.ReadPos(servoId);
   //Setting the initial position of all the servos to relative middle
   //Added print for held or not held this is for testing if the bool
@@ -147,15 +171,16 @@ void loop() {
   Serial.print(" | ServoId: ");
   Serial.println(servoId);
   displayServo(servoId);
-  if(counter == 1){
-  //Setting the initial position of all the servos to relative middle
-    st.WritePosEx(1, 2070, 500, 25);
-    st.WritePosEx(2, 1500, 500, 125);
-    st.WritePosEx(3, 2500, 500, 125);
-    st.WritePosEx(4, 2000, 500, 125);
-    st.WritePosEx(5, 2050, 500, 25);
-    st.WritePosEx(6, 2200, 500, 25);
-    delay(100);
+  if(buttonState == 0 && !bTiming){
+    buttonPresStartTime = millis();
+    bTiming = true;
+  }
+  if(millis() - buttonPressStartTime >= 250 && bTiming){
+    reset();
+  }
+  if(buttonState == 1){
+  angleJump();
+  bTiming = false;
   }
 
 //New stuff for trying to use button held to change the servo and debouncing
