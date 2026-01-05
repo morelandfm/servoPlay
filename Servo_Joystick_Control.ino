@@ -172,7 +172,7 @@ void loop() {
   Serial.println(servoId);
   displayServo(servoId);
   if(buttonState == 0 && !bTiming){
-    buttonPresStartTime = millis();
+    buttonPressStartTime = millis();
     bTiming = true;
   }
   if(millis() - buttonPressStartTime >= 250 && bTiming){
