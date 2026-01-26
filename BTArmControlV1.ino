@@ -11,6 +11,30 @@ Latest Test:
 Future Steps:
 */
 
+int long buttonPressStartTime = 0;
+bool held = false;
+bool timing = false;
+bool bTiming = false;
+bool triggered = false;
+bool movedServo = false;
+int Pos;
+int velocity[] = {1000, 1000, 800, 650, 650, 300};
+int mapPos;
+int curPos;
+//Added for tracking current speed
+int curSpeed = 600;
+bool movedServo1 = false;
+bool movedServo2 = false;
+bool movedServo3 = false;
+bool movedServo4 = false;
+bool movedServo5 = false;
+bool movedServo6 = false;
+
+byte ID[6];
+s16 Position[6];
+u16 Speed[6];
+byte ACC[6];
+
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 
 // This callback gets called any time a new gamepad is connected.
@@ -85,6 +109,26 @@ int stop(int x) {
   return cPos;
 }
 
+void reset(void){
+    st.WritePosEx(1, 2070, 500, 25);
+    st.WritePosEx(2, 1500, 500, 125);
+    st.WritePosEx(3, 2500, 500, 125);
+    st.WritePosEx(4, 2000, 500, 125);
+    st.WritePosEx(5, 2050, 500, 25);
+    st.WritePosEx(6, 2200, 500, 25);
+    delay(1000);
+}
+
+//NOT SURE IF NECESSARY
+void moveServo(int x, int y, int velocity){
+  if(y > 900){
+    st.WritePosEx(x, 4000, velocity, 25);
+  }
+  else if(y < 150){
+    st.WritePosEx(x, 0, velocity, 25);
+  }
+}
+
 // ========= GAME CONTROLLER ACTIONS SECTION ========= //
 
 void processGamepad(ControllerPtr ctl) {
@@ -124,41 +168,37 @@ void processGamepad(ControllerPtr ctl) {
     // code for when circle button is released
   }
 
-  //== PS4 Dpad UP button = 0x01 ==//
+  //== PS4 Dpad UP and DOWN button = 0x01 ==//
+  //Controlling function added
+  //Double check that this is the correct direction for the controlling of the servos
   if (ctl->buttons() == 0x01) {
-    // code for when dpad up button is pushed
-  }
-  if (ctl->buttons() != 0x01) {
-    // code for when dpad up button is released
-  }
-
-  //==PS4 Dpad DOWN button = 0x02==//
-  if (ctl->buttons() == 0x02) {
-    // code for when dpad down button is pushed
-  }
-  if (ctl->buttons() != 0x02) {
-    // code for when dpad down button is released
+    st.WritePosEx(1, 0, curSpeed, 25);
+    movedServo1 = true;
+  } else if (ctl->buttons() == 0x02) {
+    st.WritePosEx(1, 4000, curSpeed, 25);
+    movedServo1 = true;
+  } else if(movedServo1){
+    stop(1);
+    movedServo1 = false;
   }
 
-  //== PS4 Dpad LEFT button = 0x08 ==//
+  //== PS4 Dpad LEFT and RIGHT button = 0x08 ==//
+  //Controlling function added
   if (ctl->buttons() == 0x08) {
-    // code for when dpad left button is pushed
-  }
-  if (ctl->buttons() != 0x08) {
-    // code for when dpad left button is released
-  }
-
-  //== PS4 Dpad RIGHT button = 0x04 ==//
-  if (ctl->buttons() == 0x04) {
-    // code for when dpad right button is pushed
-  }
-  if (ctl->buttons() != 0x04) {
-    // code for when dpad right button is released
+    st.WritePosEx(2, 4000, curSpeed, 25);
+    movedServo2 = true;
+  } else if (ctl->buttons() == 0x04) {
+    st.WritePosEx(2, 0, curSpeed, 25);
+    movedServo2 = true;
+  } else if(movedServo2){
+    stop(2);
+    movedServo2 = false;
   }
 
   //== PS4 R1 trigger button = 0x0020 ==//
+  //Controlling function added
   if (ctl->buttons() == 0x0020) {
-    // code for when R1 button is pushed
+    curSpeed = curSpeed + 200;
   }
   if (ctl->buttons() != 0x0020) {
     // code for when R1 button is released
@@ -173,55 +213,109 @@ void processGamepad(ControllerPtr ctl) {
   }
 
   //== PS4 L1 trigger button = 0x0010 ==//
+  //Controlling function added
   if (ctl->buttons() == 0x0010) {
-    // code for when L1 button is pushed
+    if(curSpeed != 0){
+    curSpeed = curSpeed - 200;
+    }
   }
   if (ctl->buttons() != 0x0010) {
     // code for when L1 button is released
   }
 
   //== PS4 L2 trigger button = 0x0040 ==//
+  //Controlling function added
   if (ctl->buttons() == 0x0040) {
-    // code for when L2 button is pushed
+    reset();
   }
   if (ctl->buttons() != 0x0040) {
     // code for when L2 button is released
   }
 
   //== LEFT JOYSTICK - UP ==//
+  //Controlling function added
+  //Dont forget to set a value for curSpeed
   if (ctl->axisY() <= -25) {
-    // code for when left joystick is pushed up
+    st.WritePosEx(3, 4000, curSpeed, 25);
+    movedServo3 = true;
     }
 
   //== LEFT JOYSTICK - DOWN ==//
   if (ctl->axisY() >= 25) {
-    // code for when left joystick is pushed down
+    st.WritePosEx(3, 0, curSpeed, 25);
+    movedServo3 = true;
   }
 
   //== LEFT JOYSTICK - LEFT ==//
   if (ctl->axisX() <= -25) {
-    // code for when left joystick is pushed left
+    st.WritePosEx(4, 4000, curSpeed, 25);
+    movedServo4 = true;
   }
 
   //== LEFT JOYSTICK - RIGHT ==//
   if (ctl->axisX() >= 25) {
-    // code for when left joystick is pushed right
+    st.WritePosEx(4, 0, curSpeed, 25);
+    movedServo4 = true;
   }
 
   //== LEFT JOYSTICK DEADZONE ==//
   if (ctl->axisY() > -25 && ctl->axisY() < 25 && ctl->axisX() > -25 && ctl->axisX() < 25) {
-    // code for when left joystick is at idle
+    if(movedServo3 || movedServo4){
+    stop(3);
+    stop(4);
+    movedServo3 = false;
+    movedServo4 = false;
+    }
   }
 
+  /*LEAVING IN FOR NOW BUT OLD CODE
   //== RIGHT JOYSTICK - X AXIS ==//
   if (ctl->axisRX()) {
-    // code for when right joystick moves along x-axis
+    st.WritePosEx(5, 4000, curSpeed, 25);
   }
 
   //== RIGHT JOYSTICK - Y AXIS ==//
   if (ctl->axisRY()) {
   // code for when right joystick moves along y-axis
   }
+  */
+  
+  //== RIGHT JOYSTICK - UP ==//
+  //Controlling function added
+  //Dont forget to set a value for curSpeed
+  if (ctl->axisRY() <= -25) {
+    st.WritePosEx(5, 4000, curSpeed, 25);
+    movedServo5 = true;
+    }
+
+  //== RIGHT JOYSTICK - DOWN ==//
+  if (ctl->axisRY() >= 25) {
+    st.WritePosEx(5, 0, curSpeed, 25);
+    movedServo5 = true;
+  }
+
+  //== RIGHT JOYSTICK - LEFT ==//
+  if (ctl->axisRX() <= -25) {
+    st.WritePosEx(6, 4000, curSpeed, 25);
+    movedServo6 = true;
+  }
+
+  //== RIGHT JOYSTICK - RIGHT ==//
+  if (ctl->axisRX() >= 25) {
+    st.WritePosEx(6, 0, curSpeed, 25);
+    movedServo6 = true;
+  }
+
+  //== RIGHT JOYSTICK DEADZONE ==//
+  if (ctl->axisY() > -25 && ctl->axisY() < 25 && ctl->axisX() > -25 && ctl->axisX() < 25) {
+    if(movedServo5 || movedServo6){
+    stop(5);
+    stop(6);
+    movedServo5 = false;
+    movedServo6 = false;
+    }
+  }
+  
   dumpGamepad(ctl);
 }
 
@@ -237,22 +331,6 @@ void processControllers() {
     }
   }
 }
-
-int long buttonPressStartTime = 0;
-bool held = false;
-bool timing = false;
-bool bTiming = false;
-bool triggered = false;
-bool movedServo = false;
-int Pos;
-int velocity[] = {1000, 1000, 800, 650, 650, 300};
-int mapPos;
-int curPos;
-
-byte ID[6];
-s16 Position[6];
-u16 Speed[6];
-byte ACC[6];
 
 // Arduino setup function. Runs in CPU 1
 void setup() {
@@ -298,5 +376,6 @@ void loop() {
     // https://stackoverflow.com/questions/66278271/task-watchdog-got-triggered-the-tasks-did-not-reset-the-watchdog-in-time
 
     // vTaskDelay(1);
-  delay(150);
+  //See what breaks
+  //delay(150);
 }
