@@ -19,17 +19,13 @@ Switch symbols to dpad
 double check speed up and slowdown
 the joystick sensitivity needs to be played with
 */
-
+//Not sure if many of these are required
 int long buttonPressStartTime = 0;
-bool held = false;
 bool timing = false;
 bool bTiming = false;
 bool triggered = false;
+//Below required
 bool movedServo = false;
-int Pos;
-int velocity[] = {1000, 1000, 800, 650, 650, 300};
-int mapPos;
-int curPos;
 //Added for tracking current speed
 int curSpeed = 600;
 bool movedServo1 = false;
@@ -244,25 +240,25 @@ void processGamepad(ControllerPtr ctl) {
   //== LEFT JOYSTICK - UP ==//
   //Controlling function added
   //Dont forget to set a value for curSpeed
-  if (ctl->axisY() <= -25) {
+  if (ctl->axisY() <= -100) {
     st.WritePosEx(3, 4000, curSpeed, 25);
     movedServo3 = true;
     }
 
   //== LEFT JOYSTICK - DOWN ==//
-  if (ctl->axisY() >= 25) {
+  if (ctl->axisY() >= 100) {
     st.WritePosEx(3, 0, curSpeed, 25);
     movedServo3 = true;
   }
 
   //== LEFT JOYSTICK - LEFT ==//
-  if (ctl->axisX() <= -25) {
+  if (ctl->axisX() <= -100) {
     st.WritePosEx(4, 4000, curSpeed, 25);
     movedServo4 = true;
   }
 
   //== LEFT JOYSTICK - RIGHT ==//
-  if (ctl->axisX() >= 25) {
+  if (ctl->axisX() >= 100) {
     st.WritePosEx(4, 0, curSpeed, 25);
     movedServo4 = true;
   }
