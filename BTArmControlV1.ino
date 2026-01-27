@@ -5,10 +5,19 @@ SMS_STS st;
 
 /*
 Latest Test:
+Right thumbstick does nothing, so it's being referenced wrong
+Dpad is backwards with the symbols: triangle, square for servo2, circle and x for servo1
+It's stopping and starting correctly
+Reset function works properly
+Speed up and slowdown are unknown if working properly
+Dpad obviously not working properly
 */
 
 /*
 Future Steps:
+Switch symbols to dpad
+double check speed up and slowdown
+the joystick sensitivity needs to be played with
 */
 
 int long buttonPressStartTime = 0;
