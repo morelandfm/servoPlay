@@ -16,8 +16,7 @@ Dpad obviously not working properly
 /*
 Future Steps:
 Switch symbols to dpad
-double check speed up and slowdown
-the joystick sensitivity needs to be played with
+double check speed up and slow down
 */
 //Not sure if many of these are required
 int long buttonPressStartTime = 0;
@@ -203,7 +202,9 @@ void processGamepad(ControllerPtr ctl) {
   //== PS4 R1 trigger button = 0x0020 ==//
   //Controlling function added
   if (ctl->buttons() == 0x0020) {
+    if (curSpeed >= 200){
     curSpeed = curSpeed + 200;
+    } else{curSpeed = curSpeed * 2;}
   }
   if (ctl->buttons() != 0x0020) {
     // code for when R1 button is released
@@ -221,7 +222,9 @@ void processGamepad(ControllerPtr ctl) {
   //Controlling function added
   if (ctl->buttons() == 0x0010) {
     if(curSpeed != 0){
-    curSpeed = curSpeed - 200;
+      if(curSpeed <= 200){
+        curSpeed = curSpeed * 0.5;
+      }else {curSpeed = curSpeed - 200;}
     }
   }
   if (ctl->buttons() != 0x0010) {
