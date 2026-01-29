@@ -239,7 +239,6 @@ void processGamepad(ControllerPtr ctl) {
 
   //== LEFT JOYSTICK - UP ==//
   //Controlling function added
-  //Dont forget to set a value for curSpeed
   if (ctl->axisY() <= -100) {
     st.WritePosEx(3, 4000, curSpeed, 25);
     movedServo3 = true;
@@ -287,7 +286,6 @@ void processGamepad(ControllerPtr ctl) {
   
   //== RIGHT JOYSTICK - UP ==//
   //Controlling function added
-  //Dont forget to set a value for curSpeed
   if (ctl->axisRY() <= -25) {
     st.WritePosEx(5, 4000, curSpeed, 25);
     movedServo5 = true;
@@ -312,7 +310,7 @@ void processGamepad(ControllerPtr ctl) {
   }
 
   //== RIGHT JOYSTICK DEADZONE ==//
-  if (ctl->axisY() > -25 && ctl->axisY() < 25 && ctl->axisX() > -25 && ctl->axisX() < 25) {
+  if (ctl->axisRY() > -25 && ctl->axisRY() < 25 && ctl->axisRX() > -25 && ctl->axisRX() < 25) {
     if(movedServo5 || movedServo6){
     stop(5);
     stop(6);
