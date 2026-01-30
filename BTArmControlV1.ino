@@ -14,6 +14,14 @@ Dpad obviously not working properly
 */
 
 /*
+Next Test:
+Make sure that the right thumbstick change works
+  Make sure that it changes for values below 200
+Make sure that the threshold changes are suitable for both thumbsticks
+Try and check speed changes, might need to print some thnings for this one
+*/
+
+/*
 Future Steps:
 Switch symbols to dpad
 double check speed up and slow down
