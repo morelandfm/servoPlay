@@ -2,29 +2,25 @@
 #include <SCServo.h>
 
 SMS_STS st;
-
 /*
 Latest Test:
-Right thumbstick does nothing, so it's being referenced wrong
+Velocity values aren't changing correctly, could be an issue with the reset function setting values incorrectly
+Right thumbstick works, still need to widen the value threshold so two servos aren't moving at the same time so frequently
 Dpad is backwards with the symbols: triangle, square for servo2, circle and x for servo1
-It's stopping and starting correctly
-Reset function works properly
-Speed up and slowdown are unknown if working properly
-Dpad obviously not working properly
 */
 
 /*
 Next Test:
-Make sure that the right thumbstick change works
-  Make sure that it changes for values below 200
 Make sure that the threshold changes are suitable for both thumbsticks
 Try and check speed changes, might need to print some thnings for this one
+Added trailing zeros for dpad controls, might have been contributing to the reference issues, if this doesn't work might need to relook at "controller" to double check they are being mapped correctly
+
 */
 
 /*
 Future Steps:
 Switch symbols to dpad
-double check speed up and slow down
+Fix speed up and slow down
 */
 //Not sure if many of these are required
 int long buttonPressStartTime = 0;
@@ -122,12 +118,12 @@ int stop(int x) {
 }
 
 void reset(void){
-    st.WritePosEx(1, 2070, 500, 25);
-    st.WritePosEx(2, 1500, 500, 125);
-    st.WritePosEx(3, 2500, 500, 125);
-    st.WritePosEx(4, 2000, 500, 125);
-    st.WritePosEx(5, 2050, 500, 25);
-    st.WritePosEx(6, 2200, 500, 25);
+    st.WritePosEx(1, 2070, curSpeed, 25);
+    st.WritePosEx(2, 1500, curSpeed, 25);
+    st.WritePosEx(3, 2500, curSpeed, 25);
+    st.WritePosEx(4, 2000, curSpeed, 25);
+    st.WritePosEx(5, 2050, curSpeed, 25);
+    st.WritePosEx(6, 2200, curSpeed, 25);
     delay(1000);
 }
 
@@ -183,10 +179,10 @@ void processGamepad(ControllerPtr ctl) {
   //== PS4 Dpad UP and DOWN button = 0x01 ==//
   //Controlling function added
   //Double check that this is the correct direction for the controlling of the servos
-  if (ctl->buttons() == 0x01) {
+  if (ctl->buttons() == 0x0100) {
     st.WritePosEx(1, 0, curSpeed, 25);
     movedServo1 = true;
-  } else if (ctl->buttons() == 0x02) {
+  } else if (ctl->buttons() == 0x0200) {
     st.WritePosEx(1, 4000, curSpeed, 25);
     movedServo1 = true;
   } else if(movedServo1){
@@ -196,10 +192,10 @@ void processGamepad(ControllerPtr ctl) {
 
   //== PS4 Dpad LEFT and RIGHT button = 0x08 ==//
   //Controlling function added
-  if (ctl->buttons() == 0x08) {
+  if (ctl->buttons() == 0x0800) {
     st.WritePosEx(2, 4000, curSpeed, 25);
     movedServo2 = true;
-  } else if (ctl->buttons() == 0x04) {
+  } else if (ctl->buttons() == 0x0400) {
     st.WritePosEx(2, 0, curSpeed, 25);
     movedServo2 = true;
   } else if(movedServo2){
@@ -250,25 +246,25 @@ void processGamepad(ControllerPtr ctl) {
 
   //== LEFT JOYSTICK - UP ==//
   //Controlling function added
-  if (ctl->axisY() <= -100) {
+  if (ctl->axisY() <= -200) {
     st.WritePosEx(3, 4000, curSpeed, 25);
     movedServo3 = true;
     }
 
   //== LEFT JOYSTICK - DOWN ==//
-  if (ctl->axisY() >= 100) {
+  if (ctl->axisY() >= 200) {
     st.WritePosEx(3, 0, curSpeed, 25);
     movedServo3 = true;
   }
 
   //== LEFT JOYSTICK - LEFT ==//
-  if (ctl->axisX() <= -100) {
+  if (ctl->axisX() <= -200) {
     st.WritePosEx(4, 4000, curSpeed, 25);
     movedServo4 = true;
   }
 
   //== LEFT JOYSTICK - RIGHT ==//
-  if (ctl->axisX() >= 100) {
+  if (ctl->axisX() >= 200) {
     st.WritePosEx(4, 0, curSpeed, 25);
     movedServo4 = true;
   }
@@ -297,25 +293,25 @@ void processGamepad(ControllerPtr ctl) {
   
   //== RIGHT JOYSTICK - UP ==//
   //Controlling function added
-  if (ctl->axisRY() <= -25) {
+  if (ctl->axisRY() <= -200) {
     st.WritePosEx(5, 4000, curSpeed, 25);
     movedServo5 = true;
     }
 
   //== RIGHT JOYSTICK - DOWN ==//
-  if (ctl->axisRY() >= 25) {
+  if (ctl->axisRY() >= 200) {
     st.WritePosEx(5, 0, curSpeed, 25);
     movedServo5 = true;
   }
 
   //== RIGHT JOYSTICK - LEFT ==//
-  if (ctl->axisRX() <= -25) {
+  if (ctl->axisRX() <= -200) {
     st.WritePosEx(6, 4000, curSpeed, 25);
     movedServo6 = true;
   }
 
   //== RIGHT JOYSTICK - RIGHT ==//
-  if (ctl->axisRX() >= 25) {
+  if (ctl->axisRX() >= 200) {
     st.WritePosEx(6, 0, curSpeed, 25);
     movedServo6 = true;
   }
