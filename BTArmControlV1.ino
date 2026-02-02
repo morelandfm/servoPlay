@@ -22,11 +22,6 @@ Future Steps:
 Switch symbols to dpad
 Fix speed up and slow down
 */
-//Not sure if many of these are required
-int long buttonPressStartTime = 0;
-bool timing = false;
-bool bTiming = false;
-bool triggered = false;
 //Below required
 bool movedServo = false;
 //Added for tracking current speed
@@ -89,7 +84,8 @@ void onDisconnectedController(ControllerPtr ctl) {
 void dumpGamepad(ControllerPtr ctl) {
   Serial.printf(
   "idx=%d, dpad: 0x%02x, buttons: 0x%04x, axis L: %4d, %4d, axis R: %4d, %4d, brake: %4d, throttle: %4d, "
-  "misc: 0x%02x, gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d\n",
+  /*"misc: 0x%02x, gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d\n"*/,
+  "curSpeed: \n"
   ctl->index(),        // Controller Index
   ctl->dpad(),         // D-pad
   ctl->buttons(),      // bitmask of pressed buttons
@@ -100,12 +96,13 @@ void dumpGamepad(ControllerPtr ctl) {
   ctl->brake(),        // (0 - 1023): brake button
   ctl->throttle(),     // (0 - 1023): throttle (AKA gas) button
   ctl->miscButtons(),  // bitmask of pressed "misc" buttons
-  ctl->gyroX(),        // Gyro X
+  /*ctl->gyroX(),        // Gyro X
   ctl->gyroY(),        // Gyro Y
   ctl->gyroZ(),        // Gyro Z
   ctl->accelX(),       // Accelerometer X
   ctl->accelY(),       // Accelerometer Y
-  ctl->accelZ()        // Accelerometer Z
+  ctl->accelZ()*/        // Accelerometer Z
+  ctl->curSpeed(),
   );
 }
 
@@ -179,26 +176,28 @@ void processGamepad(ControllerPtr ctl) {
   //== PS4 Dpad UP and DOWN button = 0x01 ==//
   //Controlling function added
   //Double check that this is the correct direction for the controlling of the servos
-  if (ctl->buttons() == 0x0100) {
+  if (ctl->buttons() == 0x01) {
     st.WritePosEx(1, 0, curSpeed, 25);
     movedServo1 = true;
-  } else if (ctl->buttons() == 0x0200) {
+  } else if (ctl->buttons() == 0x02) {
     st.WritePosEx(1, 4000, curSpeed, 25);
     movedServo1 = true;
-  } else if(movedServo1){
+  } 
+  if(movedServo1 && ctl->buttons() != 0x01 && ctl->buttons() != 0x02){
     stop(1);
     movedServo1 = false;
   }
 
   //== PS4 Dpad LEFT and RIGHT button = 0x08 ==//
   //Controlling function added
-  if (ctl->buttons() == 0x0800) {
+  if (ctl->buttons() == 0x08) {
     st.WritePosEx(2, 4000, curSpeed, 25);
     movedServo2 = true;
-  } else if (ctl->buttons() == 0x0400) {
+  } else if (ctl->buttons() == 0x04) {
     st.WritePosEx(2, 0, curSpeed, 25);
     movedServo2 = true;
-  } else if(movedServo2){
+  }  
+  if(movedServo2 && ctl->buttons() != 0x08 && ctl->buttons() != 0x04){
     stop(2);
     movedServo2 = false;
   }
@@ -270,7 +269,7 @@ void processGamepad(ControllerPtr ctl) {
   }
 
   //== LEFT JOYSTICK DEADZONE ==//
-  if (ctl->axisY() > -25 && ctl->axisY() < 25 && ctl->axisX() > -25 && ctl->axisX() < 25) {
+  if (ctl->axisY() > -150 && ctl->axisY() < 150 && ctl->axisX() > -150 && ctl->axisX() < 150) {
     if(movedServo3 || movedServo4){
     stop(3);
     stop(4);
@@ -317,7 +316,7 @@ void processGamepad(ControllerPtr ctl) {
   }
 
   //== RIGHT JOYSTICK DEADZONE ==//
-  if (ctl->axisRY() > -25 && ctl->axisRY() < 25 && ctl->axisRX() > -25 && ctl->axisRX() < 25) {
+  if (ctl->axisRY() > -150 && ctl->axisRY() < 150 && ctl->axisRX() > -150 && ctl->axisRX() < 150) {
     if(movedServo5 || movedServo6){
     stop(5);
     stop(6);
